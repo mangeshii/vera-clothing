@@ -1,0 +1,84 @@
+{
+  "header": {
+    "main_navigation": "Main navigation",
+    "menu_open": "Open menu",
+    "menu_close": "Close menu",
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "cart_count": "{{ count }} items in cart"
+  },
+  "404": {
+    "title": "404",
+    "not_found": "Page not found.",
+    "back_to_shopping": "Back to shopping"
+  },
+  "blog": {
+    "article_comments": "Comments",
+    "article_metadata_html": "{{ date }} by {{ author }}",
+    "comment_form_body": "Comment",
+    "comment_form_email": "Email",
+    "comment_form_name": "Name",
+    "comment_form_submit": "Post",
+    "comment_form_title": "Add a comment"
+  },
+  "cart": {
+    "checkout": "Checkout",
+    "title": "Cart",
+    "update": "Update",
+    "remove": "Remove"
+  },
+  "customers": {
+    "login": {
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "title": "Login"
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "empty": "No products in this collection yet. Check back soon.",
+    "pagination": {
+      "label": "Collection pagination"
+    }
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Add to Apple Wallet",
+    "card": "Gift card",
+    "expired": "This gift card has expired",
+    "expires_on": "Expires on {{ expires_on }}",
+    "use_at_checkout": "Use this gift card at checkout"
+  },
+  "password": {
+    "title": "This shop is private",
+    "password": "Password",
+    "enter": "Enter"
+  },
+  "products": {
+    "color_swatches": {
+      "group_label": "Available colors",
+      "swatch_label": "Color: {{ color }}"
+    },
+    "product": {
+      "add_to_cart": "Add to cart",
+      "adding": "Adding…",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "in_stock": "In stock",
+      "quantity": "Quantity",
+      "decrease_quantity": "Decrease quantity",
+      "increase_quantity": "Increase quantity",
+      "media_gallery": "Product images",
+      "media_load": "Show image {{ index }}",
+      "option_updated": "Selected variant"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search articles, pages, or products",
+    "submit": "Search",
+    "no_results_html": "No results found for {{ terms }}",
+    "results_for_html": "{{ count }} results found for {{ terms }}"
+  }
+}

@@ -1,0 +1,18 @@
+
+{
+    "sections": {
+      "main": {
+        "type": "vera-about-hero",
+        "settings": {}
+      },
+      "philosophy": {
+        "type": "vera-image-with-text",
+        "settings": {}
+      }
+    },
+    "order": [
+      "main",
+      "philosophy"
+    ]
+  }
+  

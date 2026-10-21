@@ -1,0 +1,33 @@
+
+// {
+//   "sections": {
+//     "main": {
+//       "type": "hello-world",
+//       "settings": {}
+//     }
+//   },
+//   "order": [
+//     "main"
+//   ]
+// }
+{
+  "sections": {
+    "hero": {
+      "type": "vera-hero",
+      "settings": {}
+    },
+    "categories": {
+      "type": "vera-shop-by-category",
+      "settings": {}
+    },
+    "featured": {
+      "type": "vera-featured-products",
+      "settings": {}
+    }
+  },
+  "order": [
+    "hero",
+    "categories",
+    "featured"
+  ]
+}

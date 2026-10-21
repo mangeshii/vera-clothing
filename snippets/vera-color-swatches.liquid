@@ -1,0 +1,185 @@
+{% doc %}
+  Renders color swatches for a product card when a Color/Colour option exists.
+
+  One swatch per distinct color value. Picks a representative variant per color
+  (preferring an available variant) for image and product URLs.
+
+  @param {product} product - The product to render swatches for
+
+  @example
+  {% render 'vera-color-swatches', product: product %}
+{% enddoc %}
+
+{% liquid
+  assign color_option = nil
+
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name == 'color' or option_name == 'colour'
+      assign color_option = option
+      break
+    endif
+  endfor
+%}
+
+{% if color_option != blank %}
+  {% liquid
+    assign color_option_position = color_option.position
+    assign active_color_name = nil
+    assign active_variant = product.selected_or_first_available_variant
+
+    if active_variant != blank
+      case color_option_position
+        when 1
+          assign active_color_name = active_variant.option1
+        when 2
+          assign active_color_name = active_variant.option2
+        when 3
+          assign active_color_name = active_variant.option3
+      endcase
+    endif
+  %}
+
+  <div
+    class="vera-color-swatches"
+    role="group"
+    aria-label="{{ 'products.color_swatches.group_label' | t }}"
+  >
+    {% for value in color_option.values %}
+      {% liquid
+        assign value_name = value.name | default: value
+        assign representative_variant = nil
+        assign fallback_variant = nil
+
+        for variant in product.variants
+          assign variant_color = variant.option1
+          if color_option_position == 2
+            assign variant_color = variant.option2
+          endif
+          if color_option_position == 3
+            assign variant_color = variant.option3
+          endif
+
+          if variant_color == value_name
+            if fallback_variant == nil
+              assign fallback_variant = variant
+            endif
+            if variant.available
+              assign representative_variant = variant
+              break
+            endif
+          endif
+        endfor
+
+        assign variant = representative_variant | default: fallback_variant | default: value.variant
+
+        assign swatch_style = nil
+        assign swatch_class_modifier = ''
+
+        if value.swatch.image != blank
+          assign swatch_image_url = value.swatch.image | image_url: width: 80
+          assign swatch_style = 'background-image: url(' | append: swatch_image_url | append: ');'
+        elsif value.swatch.color != blank
+          assign swatch_style = 'background-color: rgb(' | append: value.swatch.color.rgb | append: ');'
+        else
+          assign color_name = value_name | downcase
+          assign color_hex = '#cccccc'
+
+          case color_name
+            when 'black'
+              assign color_hex = '#242424'
+            when 'beige'
+              assign color_hex = '#d9c6aa'
+            when 'olive'
+              assign color_hex = '#777b57'
+            when 'white'
+              assign color_hex = '#ffffff'
+              assign swatch_class_modifier = ' vera-color-swatch--light'
+          endcase
+
+          assign swatch_style = 'background-color: ' | append: color_hex | append: ';'
+        endif
+
+        if swatch_class_modifier == blank
+          assign color_name = value_name | downcase
+          if color_name == 'white'
+            assign swatch_class_modifier = ' vera-color-swatch--light'
+          endif
+        endif
+
+        assign variant_image = nil
+        if variant != blank and variant.featured_image != blank
+          assign variant_image = variant.featured_image
+        else
+          assign variant_image = product.featured_image
+        endif
+
+        assign is_active = false
+        if active_color_name != blank and active_color_name == value_name
+          assign is_active = true
+        elsif active_color_name == blank and forloop.first
+          assign is_active = true
+        endif
+      %}
+
+      {% if variant != blank or variant_image != blank %}
+        <button
+          type="button"
+          class="vera-color-swatch{% if is_active %} is-active{% endif %}{{ swatch_class_modifier }}"
+          style="{{ swatch_style }}"
+          aria-label="{{ 'products.color_swatches.swatch_label' | t: color: value_name | escape }}"
+          aria-pressed="{% if is_active %}true{% else %}false{% endif %}"
+          title="{{ value_name | escape }}"
+          {% if variant != blank %}
+            data-variant-url="{{ variant.url | escape }}"
+          {% endif %}
+          {% if variant_image != blank %}
+            data-image-url="{{ variant_image | image_url: width: 800 | escape }}"
+            data-image-alt="{{ variant_image.alt | default: product.title | escape }}"
+            data-image-width="{{ variant_image.width }}"
+            data-image-height="{{ variant_image.height }}"
+          {% endif %}
+        ></button>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .vera-color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .vera-color-swatch {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid rgba(36, 36, 36, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .vera-color-swatch--light {
+    border-color: rgba(36, 36, 36, 0.35);
+  }
+
+  .vera-color-swatch:hover {
+    transform: scale(1.08);
+  }
+
+  .vera-color-swatch.is-active {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px #242424;
+  }
+
+  .vera-color-swatch:focus-visible {
+    outline: 2px solid #242424;
+    outline-offset: 2px;
+  }
+{% endstylesheet %}

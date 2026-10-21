@@ -1,0 +1,38 @@
+{% doc %}
+  Reusable VÉRA product card for collection grids.
+
+  @param {product} product - Product to display
+
+  @example
+  {% render 'vera-product-card', product: product %}
+{% enddoc %}
+
+<div class="vera-product-card">
+  <a href="{{ product.url }}" class="vera-product-card__link">
+    <div class="vera-product-card__image">
+      {% if product.featured_image != blank %}
+        {{
+          product.featured_image
+          | image_url: width: 800
+          | image_tag:
+            class: 'vera-product-card__main-image',
+            loading: 'lazy',
+            widths: '300, 500, 800',
+            sizes: '(max-width: 749px) 50vw, 33vw'
+        }}
+      {% else %}
+        <div class="vera-product-card__placeholder" role="presentation">
+          <span class="vera-product-card__placeholder-mark" aria-hidden="true">V</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <h3>{{ product.title | escape }}</h3>
+
+    <p class="vera-product-card__price">
+      {{ product.price | money }}
+    </p>
+  </a>
+
+  {% render 'vera-color-swatches', product: product %}
+</div>

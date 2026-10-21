@@ -1,0 +1,80 @@
+.vera-product-card__link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.vera-product-card__image {
+  aspect-ratio: 3 / 4;
+  background: #f4f0eb;
+  overflow: hidden;
+}
+
+.vera-product-card__image img,
+.vera-product-card__image svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.vera-product-card:hover .vera-product-card__image img {
+  transform: scale(1.04);
+}
+
+.vera-product-card__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #f4f0eb 0%, #eae5df 100%);
+}
+
+.vera-product-card__placeholder-mark {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 400;
+  color: rgba(151, 125, 101, 0.45);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  user-select: none;
+}
+
+.vera-product-card h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 16px 0 6px;
+  color: #242424;
+}
+
+.vera-product-card__price {
+  color: #777;
+  font-size: 14px;
+  margin: 0;
+}
+
+.vera-product-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(var(--vera-grid-columns-mobile, 2), minmax(0, 1fr));
+}
+
+@media (min-width: 750px) {
+  .vera-product-grid {
+    grid-template-columns: repeat(var(--vera-grid-columns-tablet, 2), minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 990px) {
+  .vera-product-grid {
+    grid-template-columns: repeat(var(--vera-grid-columns-desktop, 3), minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 749px) {
+  .vera-product-grid {
+    gap: 16px;
+  }
+}

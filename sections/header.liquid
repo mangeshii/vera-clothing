@@ -1,0 +1,156 @@
+{% liquid
+  assign nav_menu = section.settings.menu
+  if nav_menu == blank
+    assign nav_menu = linklists['main-menu']
+  endif
+
+  assign logo_width = section.settings.logo_width | default: 120
+%}
+
+{{ 'vera-header.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'vera-header.js' | asset_url }}" defer></script>
+
+<header
+  class="vera-header{% if section.settings.sticky_header %} vera-header--sticky{% endif %}"
+  data-vera-header
+  role="banner"
+>
+  <div class="vera-header__inner">
+    <button
+      type="button"
+      class="vera-header__menu-toggle"
+      aria-expanded="false"
+      aria-controls="vera-header-mobile-panel"
+      data-vera-menu-toggle
+      data-open-label="{{ 'header.menu_open' | t | escape }}"
+      data-close-label="{{ 'header.menu_close' | t | escape }}"
+      aria-label="{{ 'header.menu_open' | t }}"
+    >
+      <span class="vera-header__menu-toggle-lines" aria-hidden="true"></span>
+    </button>
+
+    <a class="vera-header__logo" href="{{ routes.root_url }}">
+      {% if section.settings.logo != blank %}
+        {{
+          section.settings.logo
+          | image_url: width: 400
+          | image_tag:
+            class: 'vera-header__logo-image',
+            widths: '120, 180, 240, 300',
+            sizes: '(max-width: 989px) 120px, 180px',
+            width: logo_width,
+            alt: shop.name,
+            loading: 'eager'
+        }}
+      {% else %}
+        {{ shop.name | escape }}
+      {% endif %}
+    </a>
+
+    <nav class="vera-header__nav-desktop" aria-label="{{ 'header.main_navigation' | t }}">
+      {% render 'vera-header-menu', menu: nav_menu, id_prefix: 'desktop' %}
+    </nav>
+
+    <div class="vera-header__actions">
+      <a
+        class="vera-header__icon-button"
+        href="{{ routes.search_url }}"
+        aria-label="{{ 'header.search' | t }}"
+      >
+        {{ 'icon-search.svg' | inline_asset_content }}
+      </a>
+
+      {% if shop.customer_accounts_enabled %}
+        <a
+          class="vera-header__icon-button"
+          href="{{ routes.account_url }}"
+          aria-label="{{ 'header.account' | t }}"
+        >
+          {{ 'icon-account.svg' | inline_asset_content }}
+        </a>
+      {% endif %}
+
+      <a
+        class="vera-header__icon-button"
+        href="{{ routes.cart_url }}"
+        aria-label="{{ 'header.cart' | t }}"
+      >
+        {% if cart.item_count > 0 %}
+          <span class="vera-header__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
+          <span class="visually-hidden">
+            {{ 'header.cart_count' | t: count: cart.item_count }}
+          </span>
+        {% endif %}
+        {{ 'icon-cart.svg' | inline_asset_content }}
+      </a>
+    </div>
+  </div>
+
+  <div
+    id="vera-header-mobile-panel"
+    class="vera-header__mobile-panel"
+    data-vera-mobile-panel
+  >
+    <button
+      type="button"
+      class="vera-header__mobile-backdrop"
+      data-vera-mobile-backdrop
+      tabindex="-1"
+      aria-label="{{ 'header.menu_close' | t }}"
+    ></button>
+    <div class="vera-header__mobile-drawer">
+      <nav class="vera-header__mobile-menu" aria-label="{{ 'header.main_navigation' | t }}">
+        {% render 'vera-header-menu', menu: nav_menu, id_prefix: 'mobile', class_modifier: 'mobile' %}
+      </nav>
+    </div>
+  </div>
+</header>
+
+{% stylesheet %}
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:header.settings.logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "t:header.settings.logo_width",
+      "min": 60,
+      "max": 240,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "t:header.settings.sticky_header",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

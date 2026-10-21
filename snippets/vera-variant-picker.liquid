@@ -1,0 +1,126 @@
+{% doc %}
+  Renders variant option controls for the product details page.
+
+  Color/Colour options render as swatches; Size as pill buttons; other options as pills.
+
+  @param {product} product - The product
+  @param {boolean} [enabled] - When false, renders nothing
+
+  @example
+  {% render 'vera-variant-picker', product: product, enabled: true %}
+{% enddoc %}
+
+{% unless enabled == false %}
+  {% if product.has_only_default_variant == false %}
+    <div class="vera-variant-picker" data-vera-variant-picker>
+      {% for option in product.options_with_values %}
+        {% liquid
+          assign option_name_down = option.name | downcase
+          assign is_color = false
+          assign is_size = false
+
+          if option_name_down == 'color' or option_name_down == 'colour'
+            assign is_color = true
+          endif
+
+          if option_name_down == 'size'
+            assign is_size = true
+          endif
+
+          assign option_index = option.position | minus: 1
+        %}
+
+        <fieldset class="vera-variant-picker__option">
+          <legend class="vera-variant-picker__legend">
+            {{ option.name | escape }}
+            <span class="vera-variant-picker__selected" data-vera-option-selected="{{ option_index }}"></span>
+          </legend>
+
+          {% if is_color %}
+            <div
+              class="vera-variant-picker__values vera-variant-picker__values--swatches"
+              role="group"
+              aria-label="{{ option.name | escape }}"
+            >
+              {% for value in option.values %}
+                {% liquid
+                  assign value_name = value.name | default: value
+                  assign swatch_style = nil
+                  assign swatch_modifier = ''
+
+                  if value.swatch.image != blank
+                    assign swatch_image_url = value.swatch.image | image_url: width: 80
+                    assign swatch_style = 'background-image: url(' | append: swatch_image_url | append: ');'
+                  elsif value.swatch.color != blank
+                    assign swatch_style = 'background-color: rgb(' | append: value.swatch.color.rgb | append: ');'
+                  else
+                    assign color_name = value_name | downcase
+                    assign color_hex = '#cccccc'
+
+                    case color_name
+                      when 'black'
+                        assign color_hex = '#242424'
+                      when 'beige'
+                        assign color_hex = '#d9c6aa'
+                      when 'olive'
+                        assign color_hex = '#777b57'
+                      when 'white'
+                        assign color_hex = '#ffffff'
+                        assign swatch_modifier = ' vera-variant-picker__swatch--light'
+                    endcase
+
+                    assign swatch_style = 'background-color: ' | append: color_hex | append: ';'
+                  endif
+
+                  if swatch_modifier == blank
+                    assign color_name = value_name | downcase
+                    if color_name == 'white'
+                      assign swatch_modifier = ' vera-variant-picker__swatch--light'
+                    endif
+                  endif
+                %}
+
+                <button
+                  type="button"
+                  class="vera-variant-picker__swatch{{ swatch_modifier }}{% if value.selected %} is-selected{% endif %}{% unless value.available %} is-unavailable{% endunless %}"
+                  style="{{ swatch_style }}"
+                  data-vera-option-index="{{ option_index }}"
+                  data-vera-option-value="{{ value_name | escape }}"
+                  aria-label="{{ 'products.color_swatches.swatch_label' | t: color: value_name | escape }}"
+                  aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
+                  {% unless value.available %}
+                    aria-disabled="true"
+                  {% endunless %}
+                ></button>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div
+              class="vera-variant-picker__values vera-variant-picker__values--{% if is_size %}size{% else %}generic{% endif %}"
+              role="group"
+              aria-label="{{ option.name | escape }}"
+            >
+              {% for value in option.values %}
+                {% assign value_name = value.name | default: value %}
+                <button
+                  type="button"
+                  class="vera-variant-picker__pill{% if value.selected %} is-selected{% endif %}{% unless value.available %} is-unavailable{% endunless %}"
+                  data-vera-option-index="{{ option_index }}"
+                  data-vera-option-value="{{ value_name | escape }}"
+                  aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
+                  {% unless value.available %}
+                    aria-disabled="true"
+                  {% endunless %}
+                >
+                  {{ value_name | escape }}
+                </button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </fieldset>
+      {% endfor %}
+
+      <p class="vera-variant-picker__status visually-hidden" data-vera-variant-status-live aria-live="polite"></p>
+    </div>
+  {% endif %}
+{% endunless %}

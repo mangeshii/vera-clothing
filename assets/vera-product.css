@@ -1,0 +1,349 @@
+.vera-product {
+  padding: 48px 24px 80px;
+}
+
+.vera-product__container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.vera-product__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+@media (min-width: 990px) {
+  .vera-product__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 56px;
+  }
+}
+
+.vera-product-gallery__main {
+  aspect-ratio: 3 / 4;
+  background: #f4f0eb;
+  overflow: hidden;
+}
+
+.vera-product-gallery__main-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vera-product-gallery__main-image[hidden] {
+  display: none;
+}
+
+.vera-product-gallery__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #f4f0eb 0%, #eae5df 100%);
+}
+
+.vera-product-gallery__placeholder-mark {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(40px, 8vw, 72px);
+  color: rgba(151, 125, 101, 0.45);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  user-select: none;
+}
+
+.vera-product-gallery__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vera-product-gallery__thumb {
+  width: 72px;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 1px solid transparent;
+  background: #f4f0eb;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.vera-product-gallery__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vera-product-gallery__thumb.is-active {
+  border-color: #242424;
+}
+
+.vera-product-gallery__thumb:focus-visible {
+  outline: 2px solid #242424;
+  outline-offset: 2px;
+}
+
+.vera-product-info__vendor {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #977d65;
+  margin: 0 0 10px;
+}
+
+.vera-product-info__title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 400;
+  color: #242424;
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.vera-product-info__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vera-product-info__price {
+  font-size: 18px;
+  color: #242424;
+  margin: 0;
+}
+
+.vera-product-info__compare-price {
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+  margin: 0;
+}
+
+.vera-product-info__description {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #5c5c5c;
+  margin: 0 0 28px;
+}
+
+.vera-product-info__description p:first-child {
+  margin-top: 0;
+}
+
+.vera-product-info__description p:last-child {
+  margin-bottom: 0;
+}
+
+.vera-variant-picker__option {
+  border: 0;
+  margin: 0 0 22px;
+  padding: 0;
+}
+
+.vera-variant-picker__legend {
+  font-size: 13px;
+  font-weight: 500;
+  color: #242424;
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.vera-variant-picker__selected {
+  font-weight: 400;
+  color: #777;
+}
+
+.vera-variant-picker__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vera-variant-picker__swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(36, 36, 36, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.vera-variant-picker__swatch--light {
+  border-color: rgba(36, 36, 36, 0.35);
+}
+
+.vera-variant-picker__swatch.is-selected {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #242424;
+}
+
+.vera-variant-picker__swatch.is-unavailable {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.vera-variant-picker__pill {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgba(36, 36, 36, 0.2);
+  background: #fff;
+  color: #242424;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.vera-variant-picker__pill.is-selected {
+  border-color: #242424;
+  background: #242424;
+  color: #fff;
+}
+
+.vera-variant-picker__pill.is-unavailable {
+  opacity: 0.4;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.vera-variant-picker__swatch:focus-visible,
+.vera-variant-picker__pill:focus-visible {
+  outline: 2px solid #242424;
+  outline-offset: 2px;
+}
+
+.vera-product-quantity {
+  margin-bottom: 20px;
+}
+
+.vera-product-quantity__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #242424;
+}
+
+.vera-product-quantity__control {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid rgba(36, 36, 36, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.vera-product-quantity__button {
+  width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: #fff;
+  color: #242424;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.vera-product-quantity__button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.vera-product-quantity__input {
+  width: 52px;
+  min-height: 44px;
+  border: 0;
+  border-left: 1px solid rgba(36, 36, 36, 0.15);
+  border-right: 1px solid rgba(36, 36, 36, 0.15);
+  text-align: center;
+  font-size: 15px;
+  color: #242424;
+  -moz-appearance: textfield;
+}
+
+.vera-product-quantity__input::-webkit-outer-spin-button,
+.vera-product-quantity__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.vera-product-info__availability {
+  font-size: 14px;
+  margin: 0 0 16px;
+  color: #777;
+}
+
+.vera-product-info__availability.is-in-stock {
+  color: #4a5d45;
+}
+
+.vera-product-info__availability.is-sold-out,
+.vera-product-info__availability.is-unavailable {
+  color: #9a4a4a;
+}
+
+.vera-product-form__submit {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 24px;
+  border: 0;
+  background: #242424;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.vera-product-form__submit:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.vera-product-form__submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.vera-product-form__feedback {
+  font-size: 14px;
+  margin: 12px 0 0;
+  color: #9a4a4a;
+  min-height: 1.25em;
+}
+
+.vera-product-form__feedback.is-success {
+  color: #4a5d45;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 749px) {
+  .vera-product {
+    padding: 24px 16px 56px;
+  }
+}

@@ -1,0 +1,55 @@
+{% doc %}
+  Renders primary navigation links with nested dropdowns.
+
+  @param {linklist} menu - Navigation link list
+  @param {string} id_prefix - Prefix for unique submenu IDs
+  @param {string} [class_modifier] - Optional BEM modifier for mobile/desktop
+
+  @example
+  {% render 'vera-header-menu', menu: nav_menu, id_prefix: 'desktop' %}
+{% enddoc %}
+
+{% if menu != blank and menu.links.size > 0 %}
+  <ul
+    class="vera-header__menu{% if class_modifier != blank %} vera-header__menu--{{ class_modifier }}{% endif %}"
+    role="list"
+  >
+    {% for link in menu.links %}
+      <li
+        class="vera-header__menu-item{% if link.links.size > 0 %} vera-header__menu-item--has-children{% endif %}"
+      >
+        {% if link.links.size > 0 %}
+          <button
+            type="button"
+            class="vera-header__menu-trigger"
+            aria-expanded="false"
+            aria-controls="vera-submenu-{{ id_prefix }}-{{ forloop.index }}"
+            data-vera-submenu-trigger
+          >
+            {{ link.title | escape }}
+            <span class="vera-header__menu-chevron" aria-hidden="true"></span>
+          </button>
+          <ul
+            id="vera-submenu-{{ id_prefix }}-{{ forloop.index }}"
+            class="vera-header__submenu"
+            role="list"
+            data-vera-submenu
+          >
+            {% if link.url != blank %}
+              <li class="vera-header__submenu-item vera-header__submenu-item--parent">
+                <a href="{{ link.url }}">{{ link.title | escape }}</a>
+              </li>
+            {% endif %}
+            {% for child_link in link.links %}
+              <li class="vera-header__submenu-item">
+                <a href="{{ child_link.url }}">{{ child_link.title | escape }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <a class="vera-header__menu-link" href="{{ link.url }}">{{ link.title | escape }}</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

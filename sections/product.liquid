@@ -1,0 +1,307 @@
+{% comment %}
+  VÉRA product details page.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/product
+{% endcomment %}
+
+{% liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id = 'vera-product-form-' | append: section.id
+
+  assign featured_media = current_variant.featured_media | default: product.featured_media
+  assign featured_image = featured_media.preview_image | default: product.featured_image
+
+%}
+
+{{ 'vera-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'vera-product.js' | asset_url }}" defer></script>
+
+<section
+  class="vera-product"
+  data-vera-product
+  style="background-color: {{ section.settings.background_color }};"
+>
+  <div class="vera-product__container">
+    <div class="vera-product__grid">
+      <div class="vera-product-gallery">
+        <div class="vera-product-gallery__main">
+          {% if featured_image != blank %}
+            {{
+              featured_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'vera-product-gallery__main-image',
+                loading: 'eager',
+                widths: '400, 600, 800, 1000, 1200',
+                sizes: '(max-width: 989px) 100vw, 55vw',
+                width: featured_image.width,
+                height: featured_image.height,
+                alt: featured_image.alt | default: product.title
+            }}
+          {% endif %}
+          <div
+            class="vera-product-gallery__placeholder"
+            data-vera-product-placeholder
+            {% if featured_image != blank %}
+              hidden
+            {% endif %}
+            role="presentation"
+          >
+            <span class="vera-product-gallery__placeholder-mark" aria-hidden="true">V</span>
+          </div>
+        </div>
+
+        {% if section.settings.show_thumbnails and product.images.size > 1 %}
+          <ul class="vera-product-gallery__thumbs" aria-label="{{ 'products.product.media_gallery' | t }}">
+            {% for image in product.images %}
+              <li>
+                <button
+                  type="button"
+                  class="vera-product-gallery__thumb{% if featured_image.id == image.id %} is-active{% endif %}"
+                  data-vera-gallery-thumb="{{ image.id }}"
+                  data-src="{{ image | image_url: width: 1200 }}"
+                  data-alt="{{ image.alt | default: product.title | escape }}"
+                  data-width="{{ image.width }}"
+                  data-height="{{ image.height }}"
+                  aria-label="{{ 'products.product.media_load' | t: index: forloop.index }}"
+                >
+                  {{
+                    image
+                    | image_url: width: 160
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '80, 120, 160',
+                      sizes: '72px',
+                      width: image.width,
+                      height: image.height,
+                      alt: ''
+                  }}
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="vera-product-info">
+        {% if section.settings.show_vendor and product.vendor != blank %}
+          <p class="vera-product-info__vendor">{{ product.vendor | escape }}</p>
+        {% endif %}
+
+        <h1 class="vera-product-info__title">{{ product.title | escape }}</h1>
+
+        <div class="vera-product-info__price-row">
+          <p class="vera-product-info__price" data-vera-product-price>
+            {{ current_variant.price | money }}
+          </p>
+          <p
+            class="vera-product-info__compare-price"
+            data-vera-product-compare-price
+            {% unless current_variant.compare_at_price > current_variant.price %}
+              hidden
+            {% endunless %}
+          >
+            {% if current_variant.compare_at_price > current_variant.price %}
+              {{ current_variant.compare_at_price | money }}
+            {% endif %}
+          </p>
+        </div>
+
+        {% if section.settings.show_description and product.description != blank %}
+          <div class="vera-product-info__description rte">
+            {{ product.description }}
+          </div>
+        {% endif %}
+
+        {% form 'product', product, id: product_form_id %}
+          <input
+            type="hidden"
+            name="id"
+            value="{{ current_variant.id }}"
+            data-vera-variant-input
+          >
+
+          {% render 'vera-variant-picker',
+            product: product,
+            enabled: section.settings.show_variant_selectors
+          %}
+
+          {% if section.settings.show_quantity %}
+            <div class="vera-product-quantity">
+              <label class="vera-product-quantity__label" for="Quantity-{{ section.id }}">
+                {{ 'products.product.quantity' | t }}
+              </label>
+              <div class="vera-product-quantity__control">
+                <button
+                  type="button"
+                  class="vera-product-quantity__button"
+                  data-vera-quantity-minus
+                  aria-label="{{ 'products.product.decrease_quantity' | t }}"
+                >
+                  −
+                </button>
+                <input
+                  id="Quantity-{{ section.id }}"
+                  class="vera-product-quantity__input"
+                  type="number"
+                  name="quantity"
+                  min="1"
+                  value="1"
+                  inputmode="numeric"
+                  data-vera-quantity-input
+                >
+                <button
+                  type="button"
+                  class="vera-product-quantity__button"
+                  data-vera-quantity-plus
+                  aria-label="{{ 'products.product.increase_quantity' | t }}"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          {% else %}
+            <input type="hidden" name="quantity" value="1">
+          {% endif %}
+
+          {% if section.settings.show_availability %}
+            <p
+              class="vera-product-info__availability{% if current_variant.available %} is-in-stock{% else %} is-sold-out{% endif %}"
+              data-vera-product-availability
+            >
+              {% if current_variant.available %}
+                {{ 'products.product.in_stock' | t }}
+              {% else %}
+                {{ 'products.product.sold_out' | t }}
+              {% endif %}
+            </p>
+          {% else %}
+            <p class="vera-product-info__availability visually-hidden" data-vera-product-availability hidden></p>
+          {% endif %}
+
+          <button
+            type="submit"
+            class="vera-product-form__submit"
+            data-vera-add-to-cart
+            {% unless current_variant.available %}
+              disabled
+            {% endunless %}
+          >
+            {% if current_variant.available %}
+              {{ 'products.product.add_to_cart' | t }}
+            {% else %}
+              {{ 'products.product.sold_out' | t }}
+            {% endif %}
+          </button>
+
+          <p class="vera-product-form__feedback" data-vera-form-feedback role="status" aria-live="polite"></p>
+
+          {{ form | payment_button }}
+        {% endform %}
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" data-vera-product-json>
+    {
+      "initialVariantId": {{ current_variant.id | json }},
+      "product": {
+        "title": {{ product.title | json }}
+      },
+      "moneyFormat": {{ shop.money_format | json }},
+      "showAvailability": {{ section.settings.show_availability | json }},
+      "fallbackImage": {% if product.featured_image %}{
+        "id": {{ product.featured_image.id | json }},
+        "src": {{ product.featured_image | image_url: width: 1200 | json }},
+        "alt": {{ product.featured_image.alt | default: product.title | json }},
+        "width": {{ product.featured_image.width | json }},
+        "height": {{ product.featured_image.height | json }}
+      }{% else %}null{% endif %},
+      "strings": {
+        "add_to_cart": {{ 'products.product.add_to_cart' | t | json }},
+        "sold_out": {{ 'products.product.sold_out' | t | json }},
+        "unavailable": {{ 'products.product.unavailable' | t | json }},
+        "in_stock": {{ 'products.product.in_stock' | t | json }},
+        "adding": {{ 'products.product.adding' | t | json }},
+        "option_updated": {{ 'products.product.option_updated' | t | json }}
+      },
+      "variants": [
+        {% for variant in product.variants %}
+          {
+            "id": {{ variant.id | json }},
+            "title": {{ variant.title | json }},
+            "available": {{ variant.available | json }},
+            "price": {{ variant.price | json }},
+            "compare_at_price": {{ variant.compare_at_price | json }},
+            "option1": {{ variant.option1 | json }},
+            "option2": {{ variant.option2 | json }},
+            "option3": {{ variant.option3 | json }},
+            "inventory_management": {{ variant.inventory_management | json }},
+            "inventory_policy": {{ variant.inventory_policy | json }},
+            "inventory_quantity": {{ variant.inventory_quantity | json }},
+            "featured_image": {% if variant.featured_image %}{
+              "id": {{ variant.featured_image.id | json }},
+              "src": {{ variant.featured_image | image_url: width: 1200 | json }},
+              "alt": {{ variant.featured_image.alt | default: product.title | json }},
+              "width": {{ variant.featured_image.width | json }},
+              "height": {{ variant.featured_image.height | json }}
+            }{% else %}null{% endif %}
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    }
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "t:general.product",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "t:products.settings.show_vendor",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "t:products.settings.show_description",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_selectors",
+      "label": "t:products.settings.show_variant_selectors",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "t:products.settings.show_quantity",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_availability",
+      "label": "t:products.settings.show_availability",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_thumbnails",
+      "label": "t:products.settings.show_thumbnails",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:labels.background",
+      "default": "#f9f7f4"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

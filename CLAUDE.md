@@ -1,0 +1,1 @@
+/Users/hm/Desktop/vera-clothing-theme/AGENTS.md

@@ -1,0 +1,204 @@
+{% comment %}
+  VÉRA collection page — product grid with pagination.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+{% endcomment %}
+
+{{ 'vera-product-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'vera-color-swatches.js' | asset_url }}" defer></script>
+
+<section
+  class="vera-collection"
+  style="--vera-grid-columns-desktop: {{ section.settings.columns_desktop }}; background-color: {{ section.settings.background_color }};"
+>
+  <div class="vera-collection__container">
+    <header class="vera-collection__header">
+      <p class="vera-collection__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h1 class="vera-collection__title">{{ collection.title | escape }}</h1>
+      {% if section.settings.show_description %}
+        {% if collection.description != blank %}
+          <div class="vera-collection__description rte">
+            {{ collection.description }}
+          </div>
+        {% endif %}
+      {% endif %}
+    </header>
+
+    {% paginate collection.products by section.settings.products_per_page %}
+      {% if collection.products.size > 0 %}
+        <div class="vera-product-grid vera-collection__grid">
+          {% for product in collection.products %}
+            {% render 'vera-product-card', product: product %}
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <nav class="vera-collection__pagination" aria-label="{{ 'collections.pagination.label' | t }}">
+            {{ paginate | default_pagination }}
+          </nav>
+        {% endif %}
+      {% else %}
+        <p class="vera-collection__empty">{{ 'collections.empty' | t }}</p>
+      {% endif %}
+    {% endpaginate %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .vera-collection {
+    padding: 72px 24px 90px;
+    background: #f9f7f4;
+  }
+
+  .vera-collection__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .vera-collection__header {
+    text-align: center;
+    margin-bottom: 48px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .vera-collection__eyebrow {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #977d65;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+  }
+
+  .vera-collection__title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 400;
+    color: #242424;
+    margin: 0 0 16px;
+    line-height: 1.15;
+  }
+
+  .vera-collection__description {
+    font-size: 15px;
+    line-height: 1.65;
+    color: #5c5c5c;
+    margin: 0;
+  }
+
+  .vera-collection__description p:first-child {
+    margin-top: 0;
+  }
+
+  .vera-collection__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .vera-collection__empty {
+    text-align: center;
+    font-size: 16px;
+    color: #777;
+    margin: 48px 0 0;
+  }
+
+  .vera-collection__pagination {
+    margin-top: 56px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .vera-collection__pagination .pagination,
+  .vera-collection__pagination ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vera-collection__pagination li {
+    margin: 0;
+  }
+
+  .vera-collection__pagination a,
+  .vera-collection__pagination span {
+    display: inline-block;
+    font-size: 14px;
+    color: #242424;
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .vera-collection__pagination a:hover {
+    border-color: rgba(36, 36, 36, 0.2);
+  }
+
+  .vera-collection__pagination .current,
+  .vera-collection__pagination span.current {
+    font-weight: 500;
+    border-color: #242424;
+  }
+
+  @media (max-width: 749px) {
+    .vera-collection {
+      padding: 48px 16px 64px;
+    }
+
+    .vera-collection__header {
+      margin-bottom: 32px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:collections.settings.eyebrow",
+      "default": "THE VÉRA COLLECTION"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "t:collections.settings.show_description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "t:collections.settings.products_per_page",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "t:collections.settings.columns_desktop",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:labels.background",
+      "default": "#f9f7f4"
+    }
+  ]
+}
+{% endschema %}
