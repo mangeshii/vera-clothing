@@ -33,32 +33,35 @@ Each box receives a unique bundle ID when it is added to the cart.
 **Important:** The current JavaScript calculates the discount for display
 purposes only. It does not apply an actual Shopify cart or checkout discount.
 
-### Actual Discount Implementation
+### Actual discount implementation (current status)
 
-The discount must be applied through Shopify's discount system rather than
-through frontend price calculations.
+**Not verified at checkout.** The builder preview (`pricing()` in
+`assets/build-your-box.js`) is **not** a Shopify discount. The cart shows
+discounts only when Shopify sets `final_line_price` below `original_line_price`
+and `cart.total_discount` > 0 (`sections/cart.liquid`).
 
-Shopify's native automatic discounts support percentage discounts and
-minimum-quantity requirements. However, a collection-based quantity rule
-does not, by itself, guarantee that qualifying items belong to the same box.
+**Why Admin “15% off collection when qty ≥ 5” failed:** Shopify counts
+qualifying items across the cart; it cannot group by `_bundle_id`. That rule
+incorrectly discounted 3-item boxes when combined with other boxes or collection
+lines.
 
-The implementation must therefore ensure that:
+**Chosen direction (documented, not deployed here):** A **Shopify Discount
+Function** installed via a **public App Store app** (Basic-compatible) that
+reads line attributes `_bundle_id` and `_bundle_size`, groups lines per box, and
+applies 0% / 15% / 30% per complete box. A **custom** Function app built only
+for this store requires **Shopify Plus**; it is not assumed available.
 
-- A completed 3-item box receives no discount.
-- A completed 5-item box receives a 15% discount.
-- A completed 8-item box receives a 30% discount.
-- Items from separate boxes are evaluated independently when required.
-- Ordinary products outside the intended promotion are not unintentionally
-  discounted.
-- The actual discount is visible in the cart and checkout.
+Full plan, acceptance tests, and rollback:
+[`docs/per-box-discount-implementation.md`](docs/per-box-discount-implementation.md).
 
-If native discount configuration cannot enforce these requirements,
-evaluate a compatible Shopify discount app or a Shopify Discount Function.
+**Git isolation (local only — nothing pushed):**
 
-Before selecting a custom Function implementation, verify the store's plan
-and app deployment requirements. Custom apps using Shopify Functions have
-plan restrictions, while eligible public App Store apps may support
-additional plans.
+| Branch | Purpose |
+|--------|---------|
+| `backup/pre-per-box-discount-2026-10-26` | Snapshot of all BYOB work before discount docs |
+| `feature/per-box-checkout-discount` | Discount implementation planning branch |
+
+Rollback: `git checkout backup/pre-per-box-discount-2026-10-26`
 
 ### Configuration
 
@@ -74,21 +77,24 @@ Before testing the builder:
 Do not treat the discount as production-ready until the checkout behavior
 has been verified.
 
-### Testing Checklist
+### Testing checklist
 
-Test the following scenarios in a development or test store:
+Run on an **unpublished development theme** after a verified discount app or
+Function is configured. **Do not use the live theme** without explicit approval.
 
-| Scenario | Expected Result |
-|----------|----------------|
-| Complete 3-item box | 0% discount |
-| Complete 5-item box | 15% discount |
-| Complete 8-item box | 30% discount |
-| Incomplete box | Cannot be added to the cart |
-| Two separate boxes | Each box is evaluated independently |
-| Box mixed with unrelated products | Only eligible box items receive the intended discount |
-| Discount configuration disabled | No frontend-only discount is presented as an applied discount |
-| Cart quantity or box contents changed | Discount eligibility is recalculated correctly |
-| Checkout | Actual Shopify discount matches the applicable tier |
+| Scenario | Expected result | Verified? |
+|----------|-----------------|-----------|
+| Complete 3-item box | 0% at cart/checkout | **No** — pending app/Function |
+| Complete 5-item box | 15% on bundle lines only | **No** |
+| Complete 8-item box | 30% on bundle lines only | **No** |
+| 3-item + 5-item in one cart | 0% and 15% independently | **No** |
+| Two 5-item boxes | 15% each, not combined | **No** |
+| Box + normal product | Normal product undiscounted | **No** |
+| Remove one box | Other box unchanged | **No** |
+| Checkout total | Matches `cart.total_price` | **No** |
+
+Builder-only and Oct 2026 cart tests did **not** show a real 30% checkout
+discount on an 8-item box — see `docs/build-your-box-testing-report.md`.
 
 ### Limitations and Maintenance
 
