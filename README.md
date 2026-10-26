@@ -54,6 +54,11 @@ for this store requires **Shopify Plus**; it is not assumed available.
 Full plan, acceptance tests, and rollback:
 [`docs/per-box-discount-implementation.md`](docs/per-box-discount-implementation.md).
 
+App Store comparison (no installs performed):
+[`docs/app-store-per-box-discount-research.md`](docs/app-store-per-box-discount-research.md).
+**Pilot candidate:** Function Studio — discount function by `_bundle_size` /
+`_bundle_id`, not verified on this store yet.
+
 **Git isolation (local only — nothing pushed):**
 
 | Branch | Purpose |
