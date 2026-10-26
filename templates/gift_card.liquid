@@ -27,7 +27,7 @@
   <body>
     <main>
       <div class="shopify-section">
-        <h1>{{ gift_card.balance | money }}</h1>
+        <h1>{% render 'vera-money', amount: gift_card.balance %}</h1>
 
         {% if gift_card.enabled == false or gift_card.expired %}
           <p>{{ 'gift_card.expired' | t }}</p>

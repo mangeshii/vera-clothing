@@ -1,0 +1,132 @@
+{{ 'build-your-box.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'build-your-box.js' | asset_url }}" defer></script>
+
+{% liquid
+  assign box_collection = section.settings.collection
+%}
+
+<script type="application/json" id="box-shop-data">
+  {
+    "moneyFormat": {{ shop.money_format | json }},
+    "currency": {{ cart.currency.iso_code | json }}
+  }
+</script>
+
+<section
+  class="box-builder"
+  id="box-builder"
+  data-collection-handle="{{ box_collection.handle | default: '' | escape }}"
+>
+  <div class="box-builder__inner">
+    <header class="box-builder__header">
+      <h1>Build Your Own Box</h1>
+      <p>Choose your box size and pick your favorite products.</p>
+    </header>
+
+    <div class="box-sizes">
+      <button type="button" data-box-size="3">
+        3 Items
+        <span class="box-size__discount">0%</span>
+      </button>
+
+      <button type="button" data-box-size="5">
+        5 Items
+        <span class="box-size__discount">15%</span>
+      </button>
+
+      <button type="button" data-box-size="8">
+        8 Items
+        <span class="box-size__discount">30%</span>
+      </button>
+    </div>
+
+    <div class="box-builder__layout">
+      <div class="box-builder__products">
+        <h2>Choose Your Products</h2>
+        <div id="box-products">
+          Products will appear here.
+        </div>
+      </div>
+
+      <aside id="box-summary">
+        <h2>Your Box</h2>
+        <p>0 items selected</p>
+
+        <div class="box-summary__progress" aria-hidden="true">
+          <div class="box-summary__progress-track">
+            <div class="box-summary__progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="box-summary__items">
+          Selected products will appear here.
+        </div>
+
+        <div class="box-summary__pricing">
+          <div class="box-summary__pricing-row box-summary__pricing-row--subtotal">
+            <span class="box-summary__pricing-label">Subtotal</span>
+            <span class="box-summary__pricing-value">—</span>
+          </div>
+
+          <div class="box-summary__pricing-row box-summary__pricing-row--discount">
+            <span class="box-summary__pricing-label">Discount</span>
+            <span class="box-summary__pricing-value">—</span>
+          </div>
+
+          <div class="box-summary__pricing-row box-summary__pricing-row--total">
+            <span class="box-summary__pricing-label">Total</span>
+            <span class="box-summary__pricing-value">—</span>
+          </div>
+        </div>
+
+        <button type="button" class="box-summary__checkout" disabled>
+          Checkout
+        </button>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% if box_collection != blank %}
+  {% paginate box_collection.products by 250 %}
+    <script type="application/json" id="box-inventory-data">
+      {
+        {% for product in box_collection.products %}
+          {% unless forloop.first %},{% endunless %}
+          "{{ product.id }}": {
+            {% for variant in product.variants %}
+              {% unless forloop.first %},{% endunless %}
+              "{{ variant.id }}": {
+                "available": {{ variant.available | json }},
+                "quantity": {{ variant.inventory_quantity | json }},
+                "management": {{ variant.inventory_management | json }},
+                "policy": {{ variant.inventory_policy | json }}
+              }
+            {% endfor %}
+          }
+        {% endfor %}
+      }
+    </script>
+  {% endpaginate %}
+{% else %}
+  <script type="application/json" id="box-inventory-data">{}</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Build Your Own Box",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Builder product collection",
+      "info": "Products load via the collection Ajax API. Add products to this collection in Admin."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Build Your Own Box"
+    }
+  ]
+}
+{% endschema %}

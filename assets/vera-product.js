@@ -1,7 +1,24 @@
 (function () {
-  function formatMoney(cents, moneyFormat) {
+  function moneyFormatForCurrency(moneyFormat, currencyCode) {
+    if (currencyCode === 'INR') {
+      return '₹{{amount}}';
+    }
+
+    return moneyFormat || '${{amount}}';
+  }
+
+  function formatMoney(cents, moneyFormat, currencyCode) {
+    const format = moneyFormatForCurrency(moneyFormat, currencyCode);
+
     if (typeof Shopify !== 'undefined' && typeof Shopify.formatMoney === 'function') {
-      return Shopify.formatMoney(cents, moneyFormat);
+      return Shopify.formatMoney(cents, format);
+    }
+
+    if (currencyCode === 'INR') {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR'
+      }).format(cents / 100);
     }
 
     return (cents / 100).toFixed(2);
@@ -168,6 +185,7 @@
       product,
       strings,
       moneyFormat,
+      currency,
       fallbackImage,
       showAvailability,
     } = data;
@@ -207,7 +225,7 @@
 
     if (priceEl) {
       if (variant) {
-        priceEl.textContent = formatMoney(variant.price, moneyFormat);
+        priceEl.textContent = formatMoney(variant.price, moneyFormat, currency);
         priceEl.hidden = false;
       } else {
         priceEl.hidden = true;
@@ -222,7 +240,11 @@
 
       compareEl.hidden = !showCompare;
       if (showCompare) {
-        compareEl.textContent = formatMoney(variant.compare_at_price, moneyFormat);
+        compareEl.textContent = formatMoney(
+          variant.compare_at_price,
+          moneyFormat,
+          currency
+        );
       }
     }
 

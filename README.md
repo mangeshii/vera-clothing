@@ -1,160 +1,102 @@
-<h1 align="center" style="position: relative;">
-  <br>
-    <img src="./assets/shoppy-x-ray.svg" alt="logo" width="200">
-  <br>
-  Shopify Skeleton Theme
-</h1>
+## Build Your Own Box — Vera Clothing
 
-A minimal, carefully structured Shopify theme designed to help you quickly get started. Designed with modularity, maintainability, and Shopify's best practices in mind.
+The Build Your Own Box feature allows customers to select products and
+variants, choose a box size, and add their completed box to the cart.
 
-<p align="center">
-  <a href="./LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
-  <a href="./actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Shopify/skeleton-theme/actions/workflows/ci.yml/badge.svg"></a>
-</p>
+### Box Sizes and Discount Tiers
 
-## Getting started
+| Box Size | Discount |
+|----------|----------|
+| 3 items  | 0%       |
+| 5 items  | 15%      |
+| 8 items  | 30%      |
 
-### Prerequisites
+Discounts must be applied by Shopify at checkout. Displaying a discounted
+total in the theme UI does not constitute an actual discount.
 
-Before starting, ensure you have the latest Shopify CLI installed:
+### How It Works
 
-- [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) – helps you download, upload, preview themes, and streamline your workflows
+The builder is implemented in `assets/build-your-box.js`.
 
-If you use VS Code:
+The current implementation:
 
-- [Shopify Liquid VS Code Extension](https://shopify.dev/docs/storefronts/themes/tools/shopify-liquid-vscode) – provides syntax highlighting, linting, inline documentation, and auto-completion specifically designed for Liquid templates
+- Lets customers choose a box size and select products and variants.
+- Displays the subtotal, expected discount, and estimated total.
+- Validates box completion, product selection limits, and available stock.
+- Stores the builder selection in browser local storage.
+- Adds selected items to the Shopify cart using the Ajax Cart API.
+- Attaches `_bundle_id` and `_bundle_size` line-item properties to identify
+  items belonging to the same box.
 
-### Clone
+Each box receives a unique bundle ID when it is added to the cart.
 
-Clone this repository using Git or Shopify CLI:
+**Important:** The current JavaScript calculates the discount for display
+purposes only. It does not apply an actual Shopify cart or checkout discount.
 
-```bash
-git clone git@github.com:Shopify/skeleton-theme.git
-# or
-shopify theme init
-```
+### Actual Discount Implementation
 
-### Preview
+The discount must be applied through Shopify's discount system rather than
+through frontend price calculations.
 
-Preview this theme using Shopify CLI:
+Shopify's native automatic discounts support percentage discounts and
+minimum-quantity requirements. However, a collection-based quantity rule
+does not, by itself, guarantee that qualifying items belong to the same box.
 
-```bash
-shopify theme dev
-```
+The implementation must therefore ensure that:
 
-## Theme architecture
+- A completed 3-item box receives no discount.
+- A completed 5-item box receives a 15% discount.
+- A completed 8-item box receives a 30% discount.
+- Items from separate boxes are evaluated independently when required.
+- Ordinary products outside the intended promotion are not unintentionally
+  discounted.
+- The actual discount is visible in the cart and checkout.
 
-```bash
-.
-├── assets          # Stores static assets (CSS, JS, images, fonts, etc.)
-├── blocks          # Reusable, nestable, customizable UI components
-├── config          # Global theme settings and customization options
-├── layout          # Top-level wrappers for pages (layout templates)
-├── locales         # Translation files for theme internationalization
-├── sections        # Modular full-width page components
-├── snippets        # Reusable Liquid code or HTML fragments
-└── templates       # Templates combining sections to define page structures
-```
+If native discount configuration cannot enforce these requirements,
+evaluate a compatible Shopify discount app or a Shopify Discount Function.
 
-To learn more, refer to the [theme architecture documentation](https://shopify.dev/docs/storefronts/themes/architecture).
+Before selecting a custom Function implementation, verify the store's plan
+and app deployment requirements. Custom apps using Shopify Functions have
+plan restrictions, while eligible public App Store apps may support
+additional plans.
 
-### Templates
+### Configuration
 
-[Templates](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) control what's rendered on each type of page in a theme.
+Before testing the builder:
 
-The Skeleton Theme scaffolds [JSON templates](https://shopify.dev/docs/storefronts/themes/architecture/templates/json-templates) to make it easy for merchants to customize their store.
+1. Create or select the collection used by the box builder.
+2. Add eligible, active products to the collection.
+3. Publish those products to the Online Store sales channel.
+4. Open the theme editor and configure the builder product collection.
+5. Configure the selected discount implementation.
+6. Verify that the discount applies to actual cart and checkout prices.
 
-None of the template types are required, and not all of them are included in the Skeleton Theme. Refer to the [template types reference](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) for a full list.
+Do not treat the discount as production-ready until the checkout behavior
+has been verified.
 
-### Sections
+### Testing Checklist
 
-[Sections](https://shopify.dev/docs/storefronts/themes/architecture/sections) are Liquid files that allow you to create reusable modules of content that can be customized by merchants. They can also include blocks which allow merchants to add, remove, and reorder content within a section.
+Test the following scenarios in a development or test store:
 
-Sections are made customizable by including a `{% schema %}` in the body. For more information, refer to the [section schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/sections/section-schema).
+| Scenario | Expected Result |
+|----------|----------------|
+| Complete 3-item box | 0% discount |
+| Complete 5-item box | 15% discount |
+| Complete 8-item box | 30% discount |
+| Incomplete box | Cannot be added to the cart |
+| Two separate boxes | Each box is evaluated independently |
+| Box mixed with unrelated products | Only eligible box items receive the intended discount |
+| Discount configuration disabled | No frontend-only discount is presented as an applied discount |
+| Cart quantity or box contents changed | Discount eligibility is recalculated correctly |
+| Checkout | Actual Shopify discount matches the applicable tier |
 
-### Blocks
+### Limitations and Maintenance
 
-[Blocks](https://shopify.dev/docs/storefronts/themes/architecture/blocks) let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has its own set of settings, and can be added, removed, and reordered within a section.
-
-Blocks are made customizable by including a `{% schema %}` in the body. For more information, refer to the [block schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks/schema).
-
-## Schemas
-
-When developing components defined by schema settings, we recommend these guidelines to simplify your code:
-
-- **Single property settings**: For settings that correspond to a single CSS property, use CSS variables:
-
-  ```liquid
-  <div class="collection" style="--gap: {{ block.settings.gap }}px">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection {
-      gap: var(--gap);
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "range",
-      "label": "gap",
-      "id": "gap",
-      "min": 0,
-      "max": 100,
-      "unit": "px",
-      "default": 0,
-    }]
-  }
-  {% endschema %}
-  ```
-
-- **Multiple property settings**: For settings that control multiple CSS properties, use CSS classes:
-
-  ```liquid
-  <div class="collection {{ block.settings.layout }}">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection--full-width {
-      /* multiple styles */
-    }
-    .collection--narrow {
-      /* multiple styles */
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "select",
-      "id": "layout",
-      "label": "layout",
-      "values": [
-        { "value": "collection--full-width", "label": "t:options.full" },
-        { "value": "collection--narrow", "label": "t:options.narrow" }
-      ]
-    }]
-  }
-  {% endschema %}
-  ```
-
-## CSS & JavaScript
-
-For CSS and JavaScript, we recommend using the [`{% stylesheet %}`](https://shopify.dev/docs/api/liquid/tags#stylesheet) and [`{% javascript %}`](https://shopify.dev/docs/api/liquid/tags/javascript) tags. They can be included multiple times, but the code will only appear once.
-
-### `critical.css`
-
-The Skeleton Theme explicitly separates essential CSS necessary for every page into a dedicated `critical.css` file.
-
-## Contributing
-
-We're excited for your contributions to the Skeleton Theme! This repository aims to remain as lean, lightweight, and fundamental as possible, and we kindly ask your contributions to align with this intention.
-
-Visit our [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed overview of our process, guidelines, and recommendations.
-
-## License
-
-Skeleton Theme is open-sourced under the [MIT](./LICENSE.md) License.
+- The builder's displayed prices are estimates until the actual discount
+  implementation is configured and verified.
+- Line-item properties identify bundle membership but do not enforce
+  discount eligibility on their own.
+- Cart and checkout discount calculations must be handled by Shopify's
+  discount system.
+- Update this documentation whenever the discount rules or implementation
+  change.

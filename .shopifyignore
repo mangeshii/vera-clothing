@@ -11,3 +11,9 @@
 #
 # Ignore templates and sections with a regular expression:
 #   /(templates|sections)/.*\.json/
+
+# Homepage JSON holds Theme Editor picks (hero image, etc.). Keep it on the store.
+# Ignoring stops theme dev / push from overwriting editor saves with empty local settings.
+# To copy the store homepage into this repo, temporarily remove the line below, then:
+#   shopify theme pull --theme <id> --only templates/index.json
+templates/index.json

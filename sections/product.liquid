@@ -92,7 +92,7 @@
 
         <div class="vera-product-info__price-row">
           <p class="vera-product-info__price" data-vera-product-price>
-            {{ current_variant.price | money }}
+            {% render 'vera-money', amount: current_variant.price %}
           </p>
           <p
             class="vera-product-info__compare-price"
@@ -102,7 +102,7 @@
             {% endunless %}
           >
             {% if current_variant.compare_at_price > current_variant.price %}
-              {{ current_variant.compare_at_price | money }}
+              {% render 'vera-money', amount: current_variant.compare_at_price %}
             {% endif %}
           </p>
         </div>
@@ -209,6 +209,7 @@
         "title": {{ product.title | json }}
       },
       "moneyFormat": {{ shop.money_format | json }},
+      "currency": {{ cart.currency.iso_code | json }},
       "showAvailability": {{ section.settings.show_availability | json }},
       "fallbackImage": {% if product.featured_image %}{
         "id": {{ product.featured_image.id | json }},

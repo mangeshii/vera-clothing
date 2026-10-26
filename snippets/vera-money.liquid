@@ -1,0 +1,19 @@
+{% doc %}
+  Formats a price in the storefront presentment currency.
+  Uses the rupee symbol (₹) for INR instead of "Rs" or "INR" from the default money format.
+
+  @param {number} amount - Price in currency minor units (paise/cents)
+
+  @example
+  {% render 'vera-money', amount: product.price %}
+{% enddoc %}
+
+{% liquid
+  assign vera_money_code = cart.currency.iso_code
+%}
+
+{% if vera_money_code == 'INR' %}
+  <span class="money">₹{{ amount | money_without_currency | strip_html }}</span>
+{% else %}
+  {{ amount | money }}
+{% endif %}

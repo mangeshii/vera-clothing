@@ -1,0 +1,118 @@
+{% doc %}
+  Renders a single cart line with image, details, quantity, prices, and remove.
+
+  Quantity uses the line-item key so grouped bundle rows still update the correct item.
+
+  @param {object} item - Cart line item
+
+  @example
+  {% render 'vera-cart-line', item: item %}
+{% enddoc %}
+
+{% liquid
+  assign in_bundle = false
+  if item.properties._bundle_id != blank
+    assign in_bundle = true
+  endif
+%}
+
+<article class="vera-cart-line{% if in_bundle %} vera-cart-line--in-bundle{% endif %}">
+  <div class="vera-cart-line__media">
+    {% if item.image %}
+      {% render 'image',
+        image: item.image,
+        url: item.url,
+        class: 'vera-cart-line__image',
+        width: 240,
+        height: 320,
+        crop: 'center'
+      %}
+    {% else %}
+      <a class="vera-cart-line__placeholder" href="{{ item.url }}">
+        <span aria-hidden="true">V</span>
+        <span class="visually-hidden">{{ item.product.title | escape }}</span>
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="vera-cart-line__body">
+    <div class="vera-cart-line__header">
+      <div class="vera-cart-line__info">
+        <h3 class="vera-cart-line__title">
+          <a href="{{ item.url }}">{{ item.product.title | escape }}</a>
+        </h3>
+
+        {% unless item.product.has_only_default_variant %}
+          <p class="vera-cart-line__variant">{{ item.variant.title | escape }}</p>
+        {% endunless %}
+      </div>
+      
+      {% unless in_bundle %}
+        <a
+          class="vera-cart-line__remove"
+          href="{{ item.url_to_remove }}"
+          aria-label="{{ 'cart.remove' | t }}"
+        >
+          {{ 'cart.remove' | t }}
+        </a>
+      {% endunless %}
+    </div>
+
+    <div class="vera-cart-line__bottom">
+      <div class="vera-cart-line__controls">
+        <div class="vera-cart-line__quantity-row">
+          <span class="vera-cart-line__qty-label">{{ 'cart.quantity' | t }}</span>
+
+          {% if in_bundle %}
+            <div
+              class="vera-cart-line__readonly-badge"
+              aria-label="{{ 'cart.quantity' | t }}: {{ item.quantity }}"
+            >
+              {{ item.quantity }}
+            </div>
+          {% else %}
+            <div class="vera-cart-qty" data-vera-cart-qty>
+              <button
+                type="button"
+                class="vera-cart-qty__btn"
+                data-qty-decrease
+                aria-label="{{ 'cart.decrease_quantity' | t }}"
+              >
+                −
+              </button>
+              <input
+                class="vera-cart-qty__input"
+                id="updates-{{ item.key }}"
+                type="number"
+                name="updates[{{ item.key }}]"
+                value="{{ item.quantity }}"
+                min="0"
+                inputmode="numeric"
+                aria-label="{{ 'cart.quantity' | t }}"
+              >
+              <button
+                type="button"
+                class="vera-cart-qty__btn"
+                data-qty-increase
+                aria-label="{{ 'cart.increase_quantity' | t }}"
+              >
+                +
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="vera-cart-line__prices">
+        <p class="vera-cart-line__unit">
+          <span class="vera-cart-line__price-label">{{ 'cart.unit_price' | t }}</span>
+          <span class="vera-cart-line__price-value">{% render 'vera-money', amount: item.final_price %}</span>
+        </p>
+        <p class="vera-cart-line__total">
+          <span class="vera-cart-line__price-label">{{ 'cart.line_total' | t }}</span>
+          <span class="vera-cart-line__price-value">{% render 'vera-money', amount: item.final_line_price %}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</article>

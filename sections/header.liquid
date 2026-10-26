@@ -1,9 +1,5 @@
 {% liquid
   assign nav_menu = section.settings.menu
-  if nav_menu == blank
-    assign nav_menu = linklists['main-menu']
-  endif
-
   assign logo_width = section.settings.logo_width | default: 120
 %}
 
@@ -100,7 +96,11 @@
     ></button>
     <div class="vera-header__mobile-drawer">
       <nav class="vera-header__mobile-menu" aria-label="{{ 'header.main_navigation' | t }}">
-        {% render 'vera-header-menu', menu: nav_menu, id_prefix: 'mobile', class_modifier: 'mobile' %}
+        {% render 'vera-header-menu',
+          menu: nav_menu,
+          id_prefix: 'mobile',
+          class_modifier: 'mobile'
+        %}
       </nav>
     </div>
   </div>

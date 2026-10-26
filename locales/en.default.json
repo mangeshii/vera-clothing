@@ -5,6 +5,7 @@
     "menu_close": "Close menu",
     "search": "Search",
     "account": "Account",
+    "build_your_box": "Build your box",
     "cart": "Cart",
     "cart_count": "{{ count }} items in cart"
   },
@@ -25,8 +26,30 @@
   "cart": {
     "checkout": "Checkout",
     "title": "Cart",
-    "update": "Update",
-    "remove": "Remove"
+    "page_heading": "Your cart",
+    "eyebrow": "Véra clothing",
+    "update": "Update cart",
+    "remove": "Remove",
+    "remove_entire_box": "Remove entire box",
+    "empty": "Your cart is empty.",
+    "continue_shopping": "Continue shopping",
+    "quantity": "Quantity",
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity",
+    "unit_price": "Price",
+    "line_total": "Total",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "bundle_discount": "{{ rate }}% off",
+    "order_summary": "Order summary",
+    "shipping_note": "Shipping and taxes calculated at checkout.",
+    "bundle_title": "Build your own box",
+    "box_item": "Build your own box",
+    "item_count": {
+      "one": "{{ count }} item",
+      "other": "{{ count }} items"
+    }
   },
   "customers": {
     "login": {
@@ -72,6 +95,12 @@
       "media_gallery": "Product images",
       "media_load": "Show image {{ index }}",
       "option_updated": "Selected variant"
+    }
+  },
+  "sections": {
+    "vera_shop_by_category": {
+      "no_collections": "No collections to show. Publish collections to the Online Store sales channel or adjust section settings.",
+      "select_collection": "Select collection"
     }
   },
   "search": {

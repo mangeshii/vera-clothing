@@ -1,33 +1,168 @@
-{% comment %}
-  This section is used in the cart template to render /cart page with an
-  overview of the items in customer's cart.
+{{ 'vera-cart.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cart.js' | asset_url }}" defer></script>
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
-{% endcomment %}
+<div class="vera-cart full-width">
+  <div class="vera-cart__inner">
+    <header class="vera-cart__header">
+      <p class="vera-cart__eyebrow">{{ 'cart.eyebrow' | t }}</p>
+      <h1 class="vera-cart__title">{{ 'cart.page_heading' | t }}</h1>
+      {% if cart.item_count > 0 %}
+        <p class="vera-cart__count">{{ 'cart.item_count' | t: count: cart.item_count }}</p>
+      {% endif %}
+    </header>
 
-<h1>{{ 'cart.title' | t }}</h1>
+    {% if cart.item_count == 0 %}
+      <div class="vera-cart__empty">
+        <p>{{ 'cart.empty' | t }}</p>
+        <a class="vera-cart__continue" href="{{ routes.root_url }}">
+          {{ 'cart.continue_shopping' | t }}
+        </a>
+      </div>
+    {% else %}
+      {% form 'cart', cart, class: 'vera-cart__form' %}
+        <div class="vera-cart__layout">
+          <div class="vera-cart__list">
+            {% assign rendered_bundle_ids = '|' %}
 
-<form action="{{ routes.cart_url }}" method="post">
-  <table>
-    {% for item in cart.items %}
-      <tr>
-        <td>
-          {% render 'image', image: item.image, url: item.url %}
-        </td>
-        <td>
-          <p>{{ item.product.title }}</p>
-          {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-        </td>
-        <td>
-          <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
+            {% for item in cart.items %}
+              {% assign bundle_id = item.properties._bundle_id %}
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-</form>
+              {% if bundle_id != blank %}
+                {% capture bundle_token %}|{{ bundle_id }}|{% endcapture %}
+
+                {% unless rendered_bundle_ids contains bundle_token %}
+                  {% assign rendered_bundle_ids = rendered_bundle_ids | append: bundle_id | append: '|' %}
+                  {% assign bundle_item_count = 0 %}
+                  {% assign bundle_original_total = 0 %}
+                  {% assign bundle_final_total = 0 %}
+                  {% assign bundle_size = '' %}
+                  {% assign bundle_size_consistent = true %}
+
+                  {% for bundle_item in cart.items %}
+                    {% if bundle_item.properties._bundle_id == bundle_id %}
+                      {% assign bundle_item_count = bundle_item_count | plus: bundle_item.quantity %}
+                      {% assign bundle_original_total = bundle_original_total | plus: bundle_item.original_line_price %}
+                      {% assign bundle_final_total = bundle_final_total | plus: bundle_item.final_line_price %}
+                      {% if bundle_size == blank %}
+                        {% assign bundle_size = bundle_item.properties._bundle_size %}
+                      {% elsif bundle_size != bundle_item.properties._bundle_size %}
+                        {% assign bundle_size_consistent = false %}
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% assign bundle_discount = bundle_original_total | minus: bundle_final_total %}
+                  {% assign bundle_rate = 0 %}
+                  {% assign bundle_size_number = bundle_size | plus: 0 %}
+                  {% if bundle_discount > 0 and bundle_size_consistent %}
+                    {% if bundle_size_number == 5 %}
+                      {% assign bundle_rate = 15 %}
+                    {% elsif bundle_size_number == 8 %}
+                      {% assign bundle_rate = 30 %}
+                    {% endif %}
+                  {% endif %}
+
+                  <section class="vera-cart-bundle" aria-labelledby="bundle-heading-{{ forloop.index }}">
+                    <div class="vera-cart-bundle__header">
+                      <div class="vera-cart-bundle__heading">
+                        <h2 id="bundle-heading-{{ forloop.index }}" class="vera-cart-bundle__title">
+                          {{ 'cart.bundle_title' | t }}
+                        </h2>
+                        <p class="vera-cart-bundle__meta">
+                          {{ 'cart.item_count' | t: count: bundle_item_count }}
+                          <span aria-hidden="true"> · </span>
+                          {% if bundle_discount > 0 %}
+                            <s class="vera-cart-bundle__compare">{% render 'vera-money', amount: bundle_original_total %}</s>
+                            <span class="vera-cart-bundle__price">{% render 'vera-money', amount: bundle_final_total %}</span>
+                            {% if bundle_rate > 0 %}
+                              <span aria-hidden="true"> · </span>
+                              {{ 'cart.bundle_discount' | t: rate: bundle_rate }}
+                            {% endif %}
+                          {% else %}
+                            {% render 'vera-money', amount: bundle_final_total %}
+                          {% endif %}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="vera-cart-bundle__remove"
+                        data-remove-entire-box="{{ bundle_id | escape }}"
+                      >
+                        {{ 'cart.remove_entire_box' | t }}
+                      </button>
+                    </div>
+
+                    <div class="vera-cart-bundle__items">
+                      {% for bundle_item in cart.items %}
+                        {% if bundle_item.properties._bundle_id == bundle_id %}
+                          {% render 'vera-cart-line', item: bundle_item %}
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </section>
+                {% endunless %}
+              {% endif %}
+            {% endfor %}
+
+            {% for item in cart.items %}
+              {% if item.properties._bundle_id == blank %}
+                {% render 'vera-cart-line', item: item %}
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <aside class="vera-cart__summary" aria-labelledby="cart-summary-heading">
+            <h2 id="cart-summary-heading" class="vera-cart__summary-title">
+              {{ 'cart.order_summary' | t }}
+            </h2>
+
+            {% if cart.total_discount > 0 %}
+              <div class="vera-cart__summary-row vera-cart__summary-row--subtotal">
+                <span>{{ 'cart.subtotal' | t }}</span>
+                <strong>{% render 'vera-money', amount: cart.original_total_price %}</strong>
+              </div>
+              <div class="vera-cart__summary-row vera-cart__summary-row--discount">
+                <span>{{ 'cart.discount' | t }}</span>
+                <strong>-{% render 'vera-money', amount: cart.total_discount %}</strong>
+              </div>
+            {% else %}
+              <div class="vera-cart__summary-row">
+                <span>{{ 'cart.subtotal' | t }}</span>
+                <strong>{% render 'vera-money', amount: cart.items_subtotal_price %}</strong>
+              </div>
+            {% endif %}
+
+            <div class="vera-cart__summary-row vera-cart__summary-row--total">
+              <span>{{ 'cart.total' | t }}</span>
+              <strong>{% render 'vera-money', amount: cart.total_price %}</strong>
+            </div>
+
+            <p class="vera-cart__note">{{ 'cart.shipping_note' | t }}</p>
+
+            <div class="vera-cart__actions">
+              <button
+                type="submit"
+                name="checkout"
+                class="vera-cart__checkout"
+              >
+                {{ 'cart.checkout' | t }}
+              </button>
+
+              <button
+                type="submit"
+                name="update"
+                class="vera-cart__update"
+              >
+                {{ 'cart.update' | t }}
+              </button>
+            </div>
+          </aside>
+        </div>
+      {% endform %}
+    {% endif %}
+  </div>
+</div>
 
 {% schema %}
 {

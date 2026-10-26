@@ -37,7 +37,8 @@
         | image_tag:
           loading: 'eager',
           widths: '400, 600, 800, 1200, 1600',
-          sizes: '(max-width: 749px) 100vw, 50vw'
+          sizes: '(max-width: 749px) 100vw, 50vw',
+          alt: section.settings.heading
       }}
     {% else %}
       {{ 'lifestyle-1' | placeholder_svg_tag }}
@@ -45,87 +46,7 @@
   </div>
 </section>
 
-{% stylesheet %}
-  .vera-hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 650px;
-  }
-
-  .vera-hero__content {
-    padding: 80px clamp(24px, 6vw, 100px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-  }
-
-  .vera-hero__eyebrow {
-    font-size: 12px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #977d65;
-    margin-bottom: 24px;
-  }
-
-  .vera-hero__heading {
-    font-family: Georgia, serif;
-    font-size: clamp(42px, 5vw, 78px);
-    font-weight: 400;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin: 0 0 28px;
-  }
-
-  .vera-hero__description {
-    font-size: 16px;
-    line-height: 1.8;
-    color: #666;
-    max-width: 420px;
-    margin-bottom: 36px;
-  }
-
-  .vera-hero__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 24px;
-    padding: 16px 28px;
-    background: #282824;
-    color: #fff;
-    text-decoration: none;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .vera-hero__image {
-    min-height: 650px;
-    overflow: hidden;
-  }
-
-  .vera-hero__image img,
-  .vera-hero__image svg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  @media (max-width: 749px) {
-    .vera-hero {
-      grid-template-columns: 1fr;
-    }
-
-    .vera-hero__content {
-      padding: 70px 24px;
-    }
-
-    .vera-hero__image {
-      min-height: 400px;
-      height: 400px;
-    }
-  }
-{% endstylesheet %}
+{{ 'vera-hero.css' | asset_url | stylesheet_tag }}
 
 {% schema %}
 {
@@ -152,7 +73,8 @@
     {
       "type": "image_picker",
       "id": "hero_image",
-      "label": "Hero image"
+      "label": "Hero image",
+      "info": "Saved on the theme in Theme Editor. If the image vanishes after refresh while using theme dev, ensure templates/index.json is in .shopifyignore so local empty JSON does not overwrite your upload."
     },
     {
       "type": "text",

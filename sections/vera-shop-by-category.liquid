@@ -7,100 +7,75 @@
     </div>
 
     <div class="vera-categories__grid">
-      {% for block in section.blocks %}
-        {% if block.type == 'collection_card' %}
-          {% render 'vera-collection-card', block: block %}
-        {% endif %}
-      {% endfor %}
+      {% liquid
+        assign excluded_handles = section.settings.excluded_handles | split: ','
+        assign shown_count = 0
+        assign collections_limit = section.settings.collections_limit | default: 12
+        assign hide_empty = section.settings.hide_empty_collections | default: true
+      %}
+
+      {% paginate collections by 250 %}
+        {% for collection in collections %}
+          {% if shown_count >= collections_limit %}
+            {% break %}
+          {% endif %}
+
+          {% liquid
+            assign skip_collection = false
+
+            for handle_part in excluded_handles
+              assign excluded_handle = handle_part | strip
+              if excluded_handle != blank
+                if collection.handle == excluded_handle
+                  assign skip_collection = true
+                endif
+              endif
+            endfor
+
+            if hide_empty
+              if collection.all_products_count == 0
+                assign skip_collection = true
+              endif
+            endif
+          %}
+
+          {% unless skip_collection %}
+            {% liquid
+              assign image_override = blank
+              for block in section.blocks
+                if block.type == 'collection_card'
+                  assign block_collection = block.settings.collection
+                  if block_collection != blank
+                    if block_collection.handle == collection.handle
+                      if block.settings.image != blank
+                        assign image_override = block.settings.image
+                      endif
+                      break
+                    endif
+                  endif
+                endif
+              endfor
+            %}
+
+            {% render 'vera-collection-card',
+              collection: collection,
+              image_override: image_override
+            %}
+            {% assign shown_count = shown_count | plus: 1 %}
+          {% endunless %}
+        {% endfor %}
+      {% endpaginate %}
+
+      {% if shown_count == 0 and request.design_mode %}
+        <p class="vera-categories__empty">
+          {{ 'sections.vera_shop_by_category.no_collections' | t }}
+        </p>
+      {% endif %}
     </div>
   </div>
 </section>
 
-{% stylesheet %}
-  .vera-categories {
-    padding: 90px 24px;
-    background: #f9f7f4;
-  }
-
-  .vera-categories__container {
-    max-width: 1280px;
-    margin: 0 auto;
-  }
-
-  .vera-categories__header {
-    text-align: center;
-    margin-bottom: 45px;
-  }
-
-  .vera-categories__header p {
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: #977d65;
-    text-transform: uppercase;
-  }
-
-  .vera-categories__header h2 {
-    font-family: Georgia, serif;
-    font-size: clamp(32px, 4vw, 52px);
-    font-weight: 400;
-    margin: 12px 0;
-  }
-
-  .vera-categories__grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
-
-  .vera-category-card {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .vera-category-card__image {
-    aspect-ratio: 3 / 4;
-    overflow: hidden;
-    background: #eae5df;
-  }
-
-  .vera-category-card__image img,
-  .vera-category-card__image svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-  }
-
-  .vera-category-card:hover img {
-    transform: scale(1.05);
-  }
-
-  .vera-category-card__info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 18px;
-  }
-
-  .vera-category-card__info h3 {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0;
-  }
-
-  @media (max-width: 749px) {
-    .vera-categories {
-      padding: 60px 16px;
-    }
-
-    .vera-categories__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-  }
-{% endstylesheet %}
+{{ 'vera-shop-by-category.css' | asset_url | stylesheet_tag }}
 
 {% schema %}
 {
@@ -117,18 +92,40 @@
       "id": "heading",
       "label": "Main heading",
       "default": "Shop by Category"
+    },
+    {
+      "type": "range",
+      "id": "collections_limit",
+      "label": "Maximum collections to show",
+      "min": 2,
+      "max": 24,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_empty_collections",
+      "label": "Hide collections with no products",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "excluded_handles",
+      "label": "Excluded collection handles",
+      "default": "frontpage, build-your-own-box",
+      "info": "Comma-separated handles not shown as categories (e.g. internal builder collection). Find handle under Collection → Search engine listing."
     }
   ],
   "blocks": [
     {
       "type": "collection_card",
-      "name": "Collection Card",
-      "limit": 6,
+      "name": "Custom category image",
+      "limit": 24,
       "settings": [
         {
           "type": "collection",
           "id": "collection",
-          "label": "Select collection"
+          "label": "Collection"
         },
         {
           "type": "image_picker",
@@ -140,12 +137,7 @@
   ],
   "presets": [
     {
-      "name": "Vera Shop by Category",
-      "blocks": [
-        {"type": "collection_card"},
-        {"type": "collection_card"},
-        {"type": "collection_card"}
-      ]
+      "name": "Vera Shop by Category"
     }
   ]
 }
